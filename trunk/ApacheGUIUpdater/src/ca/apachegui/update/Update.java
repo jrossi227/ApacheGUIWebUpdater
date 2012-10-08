@@ -36,7 +36,7 @@ public class Update extends HttpServlet {
 	private ExecutorService updateThread;
 
 	public enum StatusType {
-		Idle, Downloading, Installing, Finished
+		Idle, Downloading, Installing, Finished, Error
 	}
 	
 	private static StatusType status=StatusType.Idle;
@@ -86,7 +86,8 @@ public class Update extends HttpServlet {
 				out.print("{" +
 			    			"version: '" + update.getVersion() + "'," +
 			    			"size: '" + update.getSize() + "'," +
-			    			"details: '" + update.getDetails() + "'" +
+			    			"details: '" + update.getDetails() + "'," +
+			    			"compatibility: " + update.getCompatibility() +
 			    		  "}");
 
 			}
@@ -126,15 +127,15 @@ public class Update extends HttpServlet {
 				switch (getStatus()) {
 	                
 				case Idle:
-	            	out.print("{status: 'Starting...'}");
+	            	out.print("{status: 'Starting'}");
 	                break;
 				
 	            case Downloading:
-	            	out.print("{status: 'Downloading...', progress: " + UpdateThread.getDownloadPercent() + "}");
+	            	out.print("{status: 'Downloading', progress: " + UpdateThread.getDownloadPercent() + "}");
 	                break;
 	                         
 	            case Installing:
-	            	out.print("{status: 'Installing...'}");
+	            	out.print("{status: 'Installing'}");
 	            	try{
 	            		if(!new File(System.getProperty("java.io.tmpdir"),"ApacheGUIUpdate").exists()) {
 	            			Update.setStatus(Update.StatusType.Finished);
@@ -144,8 +145,13 @@ public class Update extends HttpServlet {
 	                break;
 	                
 	            case Finished:
-	            	out.print("{status: 'Finished!!'}");
-	                break;    
+	            	out.print("{status: 'Finished'}");
+	                break; 
+	                
+	            case Error:
+	            	out.print("{status: 'Error'}");
+	            	Update.setStatus(Update.StatusType.Idle);
+	                break;     
 	        }
 
 			}
@@ -175,7 +181,7 @@ public class Update extends HttpServlet {
         }    
         in.close();
 
-        String version="", size="", details="", url="";
+        String version="", size="", details="", url="", compatibility="";
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputSource is = new InputSource(new StringReader(xml.toString()));
@@ -186,8 +192,9 @@ public class Update extends HttpServlet {
         size=root.getElementsByTagName("file").item(0).getAttributes().getNamedItem("size").getTextContent();
         details=root.getElementsByTagName("details").item(0).getTextContent();
         url=root.getElementsByTagName("file").item(0).getAttributes().getNamedItem("url").getTextContent();
+        compatibility=root.getElementsByTagName("file").item(0).getAttributes().getNamedItem("compatibility").getTextContent();
 
-        return new UpdateInfo(version, size, details, url);
+        return new UpdateInfo(version, size, details, url, compatibility);
 	}
 
 	public static String getUpdaterHome() {

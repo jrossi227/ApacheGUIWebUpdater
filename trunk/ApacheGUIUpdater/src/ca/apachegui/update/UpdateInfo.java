@@ -5,12 +5,14 @@ public class UpdateInfo {
 	private String size;
 	private String details;
 	private String url;
+	private String compatibility;
 
-	public UpdateInfo(String version, String size, String details, String url) {
+	public UpdateInfo(String version, String size, String details, String url, String compatibility) {
 		this.version=version;
 		this.size=size;
 		this.details=details;
-		this.setUrl(url);
+		this.url=url;
+		this.compatibility=compatibility;
 	}
 	
 	public String getSize() {
@@ -43,5 +45,13 @@ public class UpdateInfo {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getCompatibility() {
+		return compatibility;
+	}
+
+	public void setCompatibility(String compatibility) {
+		this.compatibility = compatibility;
 	}
 }
