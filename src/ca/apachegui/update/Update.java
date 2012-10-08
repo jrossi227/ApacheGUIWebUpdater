@@ -130,7 +130,7 @@ public class Update extends HttpServlet {
 	                break;
 				
 	            case Downloading:
-	            	out.print("{status: 'Downloading...'}");
+	            	out.print("{status: 'Downloading...', progress: " + UpdateThread.getDownloadPercent() + "}");
 	                break;
 	                         
 	            case Installing:
