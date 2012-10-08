@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>ApacheGUIUpdater</display-name>
+  
+  <servlet>
+    <display-name>Update</display-name>
+    <servlet-name>Update</servlet-name>
+    <servlet-class>ca.apachegui.update.Update</servlet-class>
+    <init-param>
+            <param-name>platform</param-name>
+            <param-value>IX</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Update</servlet-name>
+    <url-pattern>/Update</url-pattern>
+  </servlet-mapping>
+</web-app>

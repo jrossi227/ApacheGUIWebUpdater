@@ -1,0 +1,4 @@
+<UpdateInfo>
+	<file version="1.4.2" url="http://sourceforge.net/projects/jrossi227.u/files/IX/ApacheGUI.war/download" size="7MB"/>
+	<details>This is a test comment describing details</details>
+</UpdateInfo>
