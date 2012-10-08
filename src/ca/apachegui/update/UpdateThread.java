@@ -32,7 +32,7 @@ public class UpdateThread implements Runnable {
 			renameFile((new File(Update.getUpdaterHome(), "files/ApacheGUI.war")).getAbsolutePath(), (new File((new File(Update.getUpdaterHome())).getParentFile().getAbsolutePath(), "ApacheGUI.war")).getAbsolutePath());
 		} 
 		catch (Exception e) {
-			// TODO Auto-generated catch block
+			Update.setStatus(Update.StatusType.Error);
 			e.printStackTrace();
 		}
 	}
@@ -47,6 +47,7 @@ public class UpdateThread implements Runnable {
         	conn.setDoInput(true);
         	HttpURLConnection.setFollowRedirects(true);
         	conn.connect();
+        	conn.setReadTimeout(60000);
         	setSize(conn.getContentLengthLong());
         	InputStream is = conn.getInputStream();
         	
