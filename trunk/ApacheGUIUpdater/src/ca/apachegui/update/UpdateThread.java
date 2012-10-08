@@ -4,9 +4,14 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class UpdateThread implements Runnable {
+	private static long progress=0;
+	private static long size=0;
+	
 	@Override
 	public void run() {
 		
@@ -15,6 +20,9 @@ public class UpdateThread implements Runnable {
 			
 			UpdateInfo info=Update.getDetails();
 			File downloadFile=new File(Update.getUpdaterHome(), "files/ApacheGUI.war");
+			
+			setProgress(0);
+			setSize(0);
 			downloadFile(info.getUrl(), downloadFile);
 			 
 			//Create File
@@ -34,14 +42,23 @@ public class UpdateThread implements Runnable {
         FileOutputStream fout = null;
         try
         {
-        	in = new BufferedInputStream(new URL(url).openStream());
+        	HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        	conn.setRequestMethod("GET");
+        	conn.setDoInput(true);
+        	HttpURLConnection.setFollowRedirects(true);
+        	conn.connect();
+        	setSize(conn.getContentLengthLong());
+        	InputStream is = conn.getInputStream();
+        	
+        	in = new BufferedInputStream(is);
             fout = new FileOutputStream(file);
-
+            
             byte data[] = new byte[1024];
             int count;
             while ((count = in.read(data, 0, 1024)) != -1)
             {
             	fout.write(data, 0, count);
+            	setProgress(getProgress() + count);
             }
         }
         finally
@@ -73,6 +90,32 @@ public class UpdateThread implements Runnable {
 	                srcFile.delete();
 	          }
 	    }
+	}
+
+	public static long getProgress() {
+		return progress;
+	}
+
+	public synchronized static void setProgress(long progress) {
+		UpdateThread.progress = progress;
+	}
+
+	public static long getSize() {
+		return size;
+	}
+
+	public synchronized static void setSize(long size) {
+		UpdateThread.size = size;
+	}
+	
+	public static long getDownloadPercent() {
+		if(size==0 || progress==0) {
+			return 0;
+		}
+		
+		double percent=(progress * 100.0d)/size;
+		
+		return (long) percent;
 	}
 
 }
