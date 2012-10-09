@@ -48,7 +48,7 @@ public class UpdateThread implements Runnable {
         	HttpURLConnection.setFollowRedirects(true);
         	conn.connect();
         	conn.setReadTimeout(60000);
-        	setSize(conn.getContentLengthLong());
+        	setSize(conn.getContentLength());
         	InputStream is = conn.getInputStream();
         	
         	in = new BufferedInputStream(is);
