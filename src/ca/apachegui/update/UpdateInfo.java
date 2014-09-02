@@ -6,13 +6,15 @@ public class UpdateInfo {
 	private String details;
 	private String url;
 	private String compatibility;
+	private String compatibilitys;
 
-	public UpdateInfo(String version, String size, String details, String url, String compatibility) {
+	public UpdateInfo(String version, String size, String details, String url, String compatibility, String compatibilitys) {
 		this.version=version;
 		this.size=size;
 		this.details=details;
 		this.url=url;
 		this.compatibility=compatibility;
+		this.compatibilitys=compatibilitys;
 	}
 	
 	public String getSize() {
@@ -53,5 +55,13 @@ public class UpdateInfo {
 
 	public void setCompatibility(String compatibility) {
 		this.compatibility = compatibility;
+	}
+
+	public String getCompatibilitys() {
+		return compatibilitys;
+	}
+
+	public void setCompatibilitys(String compatibilitys) {
+		this.compatibilitys = compatibilitys;
 	}
 }

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +19,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -29,6 +30,8 @@ import org.xml.sax.SAXException;
  * Servlet implementation class Update
  */
 public class Update extends HttpServlet {
+	Logger log = Logger.getLogger(Update.class);
+	
 	private static final long serialVersionUID = 1L;
     private static String updateInfoURL;
     private static String updaterHome;
@@ -83,20 +86,21 @@ public class Update extends HttpServlet {
 			try
 			{
 			    UpdateInfo update=getDetails();
-				out.print("{" +
-			    			"version: '" + update.getVersion() + "'," +
-			    			"size: '" + update.getSize() + "'," +
-			    			"details: '" + update.getDetails() + "'," +
-			    			"compatibility: " + update.getCompatibility() +
-			    		  "}");
+			    JSONObject details = new JSONObject();
+			    details.put("version", update.getVersion());
+			    details.put("size", update.getSize());
+			    details.put("details", update.getDetails());
+			    details.put("compatibility", update.getCompatibility());
+			    details.put("compatibilitys", update.getCompatibilitys());
+			    
+			    out.print(details.toString());
 
 			}
 			catch(Exception e)
 			{
-			    StringWriter sw = new StringWriter();
-				e.printStackTrace(new PrintWriter(sw));
-				response.setStatus(206);
-				out.print(sw.toString()); 
+				response.setContentLength(0);
+				response.setStatus(400);
+				log.error(e.getMessage(), e); 
 			}
 		}
 		
@@ -113,10 +117,9 @@ public class Update extends HttpServlet {
 			}
 			catch(Exception e)
 			{
-			    StringWriter sw = new StringWriter();
-				e.printStackTrace(new PrintWriter(sw));
-				response.setStatus(206);
-				out.print(sw.toString()); 
+				response.setContentLength(0);
+				response.setStatus(400);
+				log.error(e.getMessage(), e); 
 			}
 		}
 		
@@ -124,43 +127,48 @@ public class Update extends HttpServlet {
 		{	
 			try
 			{
+				
+				JSONObject status = new JSONObject();
+				
 				switch (getStatus()) {
 	                
-				case Idle:
-	            	out.print("{status: 'Starting'}");
-	                break;
+					case Idle:
+		            	status.put("status","Starting");
+		                break;
+					
+		            case Downloading:
+		            	status.put("status","Downloading");
+		            	status.put("progress",UpdateThread.getDownloadPercent());
+		                break;
+		                         
+		            case Installing:
+		            	status.put("status","Installing");
+		            	try{
+		            		if(!new File(System.getProperty("java.io.tmpdir"),"ApacheGUIUpdate").exists()) {
+		            			Update.setStatus(Update.StatusType.Finished);
+		            		}
+		    			}catch(Exception e){}
+		            	
+		                break;
+		                
+		            case Finished:
+		            	status.put("status","Finished");
+		                break; 
+		                
+		            case Error:
+		            	status.put("status","Error");
+		            	Update.setStatus(Update.StatusType.Idle);
+		                break;     
+				}
 				
-	            case Downloading:
-	            	out.print("{status: 'Downloading', progress: " + UpdateThread.getDownloadPercent() + "}");
-	                break;
-	                         
-	            case Installing:
-	            	out.print("{status: 'Installing'}");
-	            	try{
-	            		if(!new File(System.getProperty("java.io.tmpdir"),"ApacheGUIUpdate").exists()) {
-	            			Update.setStatus(Update.StatusType.Finished);
-	            		}
-	    			}catch(Exception e){}
-	            	
-	                break;
-	                
-	            case Finished:
-	            	out.print("{status: 'Finished'}");
-	                break; 
-	                
-	            case Error:
-	            	out.print("{status: 'Error'}");
-	            	Update.setStatus(Update.StatusType.Idle);
-	                break;     
-	        }
+				out.print(status.toString());
 
 			}
 			catch(Exception e)
 			{
-			    StringWriter sw = new StringWriter();
-				e.printStackTrace(new PrintWriter(sw));
-				response.setStatus(206);
-				out.print(sw.toString()); 
+				response.setContentLength(0);
+				response.setStatus(400);
+				log.error(e.getMessage(), e); 
 			}
 		}
 		
@@ -181,7 +189,7 @@ public class Update extends HttpServlet {
         }    
         in.close();
 
-        String version="", size="", details="", url="", compatibility="";
+        String version="", size="", details="", url="", compatibility="", compatibilitys="";
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputSource is = new InputSource(new StringReader(xml.toString()));
@@ -193,8 +201,9 @@ public class Update extends HttpServlet {
         details=root.getElementsByTagName("details").item(0).getTextContent();
         url=root.getElementsByTagName("file").item(0).getAttributes().getNamedItem("url").getTextContent();
         compatibility=root.getElementsByTagName("file").item(0).getAttributes().getNamedItem("compatibility").getTextContent();
+        compatibilitys=root.getElementsByTagName("file").item(0).getAttributes().getNamedItem("compatibilitys").getTextContent();
 
-        return new UpdateInfo(version, size, details, url, compatibility);
+        return new UpdateInfo(version, size, details, url, compatibility, compatibilitys);
 	}
 
 	public static String getUpdaterHome() {
@@ -204,5 +213,25 @@ public class Update extends HttpServlet {
 	public static void setUpdaterHome(String updaterHome) {
 		Update.updaterHome = updaterHome;
 	}
+	
+	public static String getTomcatDirectory() {
+		File current = (new File(updaterHome));
+		  
+		while(!isTomcatDirectory(current)) {
+			  current = current.getParentFile();
+		}
+		  
+		return current.getAbsolutePath();
+	}
+	
+	private static boolean isTomcatDirectory(File file) {
+		  
+	  if(file.getName().equals("tomcat")) {
+		  return true;
+	  }
+	  
+	  return false;
+  }
+	  
 
 }

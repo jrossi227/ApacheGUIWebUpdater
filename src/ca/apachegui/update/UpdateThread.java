@@ -29,7 +29,7 @@ public class UpdateThread implements Runnable {
 			new File(System.getProperty("java.io.tmpdir"),"ApacheGUIUpdate").createNewFile();
 			
 			Update.setStatus(Update.StatusType.Installing);
-			renameFile((new File(Update.getUpdaterHome(), "files/ApacheGUI.war")).getAbsolutePath(), (new File((new File(Update.getUpdaterHome())).getParentFile().getAbsolutePath(), "ApacheGUI.war")).getAbsolutePath());
+			renameFile((new File(Update.getUpdaterHome(), "files/ApacheGUI.war")).getAbsolutePath(), (new File(Update.getTomcatDirectory(), "webapps/ApacheGUI.war")).getAbsolutePath());
 		} 
 		catch (Exception e) {
 			Update.setStatus(Update.StatusType.Error);
