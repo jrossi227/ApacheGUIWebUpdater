@@ -1,4 +1,4 @@
 <UpdateInfo>
-	<file version="1.4.2" url="http://sourceforge.net/projects/jrossi227.u/files/IX/ApacheGUI.war/download" size="6MB" compatibility="/.*/g"/>
+	<file version="1.4.2" url="http://sourceforge.net/projects/jrossi227.u/files/IX/ApacheGUI.war/download" size="6MB" compatibility="/.*/g" compatibilitys=".*"/>
 	<details></details>
 </UpdateInfo>
