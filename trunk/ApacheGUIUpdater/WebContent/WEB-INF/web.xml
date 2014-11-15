@@ -14,7 +14,7 @@
   <servlet>
     <display-name>Update</display-name>
     <servlet-name>Update</servlet-name>
-    <servlet-class>ca.apachegui.update.Update</servlet-class>
+    <servlet-class>net.apachegui.update.Update</servlet-class>
     <init-param>
             <param-name>platform</param-name>
             <param-value>IX</param-value>

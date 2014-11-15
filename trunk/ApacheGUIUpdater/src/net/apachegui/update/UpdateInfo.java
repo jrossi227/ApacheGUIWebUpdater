@@ -1,4 +1,4 @@
-package ca.apachegui.update;
+package net.apachegui.update;
 
 public class UpdateInfo {
 	private String version;
