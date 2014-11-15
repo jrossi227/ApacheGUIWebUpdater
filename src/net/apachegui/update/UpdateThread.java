@@ -1,4 +1,4 @@
-package ca.apachegui.update;
+package net.apachegui.update;
 
 import java.io.BufferedInputStream;
 import java.io.File;
